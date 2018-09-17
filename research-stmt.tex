@@ -1,0 +1,221 @@
+\documentclass{article}
+\usepackage{titlesec}
+\usepackage{mathtools}
+% \titleformat{\section}[block]{\Large\bfseries\filcenter}{}{1em}{}
+\usepackage[margin=1.2 in]{geometry}
+
+\begin{document}
+
+\section*{Oblivious Transfer (OT)}
+\subsection*{Exercise}
+\begin{enumerate}
+
+\item \textbf{Receiver's Security} Assuming that DDH is true, prove that the receiver's message when $i = 0$ is computationally indistinguishable from the receiver's message when $i = 1$. \newline
+\textbf{Answer}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+To prove the \textit{computational indistinguishability} or \textit{semantic security} of the receiver's message $\{g^a,g^b,g^{c_0},g^{c_1}\}$, we formally define a game between a challenger and an adversary.
+
+\begin{itemize}
+\item The challenger chooses a secret bit $i \in \{0,1\}$, accordingly creates a receiver's message tuple $t_i$ $=$ $\{g^a,g^b,g^{c_0},g^{c_1}\}$. This tuple is given to the adversary.
+\item On receiving the tuple $t_i$, the adversary outputs it's guess $\hat{i} \in \{0,1\}$.
+\end{itemize}
+
+We define the \textit{SS-Advantage} of the adversary as $|Pr[i = \hat{i}] - \frac{1}{2}|$. Semantic security is achieved when the adversary's \textit{SS-advantage} is negligible.
+
+\textbf{Formation of Receiver's Message}
+During the $1$ out $2$ protocol, the sender has two messages $\{m_0, m_1\}$. The receiver wants to choose the $i^{th}$ message ($m_i$), where $i$ is the receiver's secret. On the other hand the sender wants to ensure that, only the message $m_i$ gets correctly decrypted at receiver's end.
+
+Once the group $G$ is defined, the generator $g$ is chosen, the receiver has to form a message to be sent to the sender. The following computation is involved during formation of the receiver's message
+
+\begin{itemize}
+\item The receiver chooses the bit $i$ $\in \{0,1\}$.
+\item It computes the value of $c_i$ as $ab$ mod $q$, where $a$, $b$ are randomly chosen from the range \{0,\ldots,(p-1)\} ($p$ $=$ prime chosen during the Group formation)
+\item The value of $c_{i-1}$ is chosen randomly from the range $\{0,\ldots,(p-1)\}$
+\item The receiver computes the tuple $\{g^a,g^b,g^{c_i},g^{c_{i-1}}\}$
+\item Then the receiver's message comprising of $p$, $q$, $g$ and the tuple $\{g^a,g^b,g^{c_i},g^{c_{i-1}}\}$ is sent to the sender.
+\end{itemize}
+
+\textbf{Security Analysis of Receiver's Message}\newline
+The receiver's message is semantically secure under the DDH assumption. DDH assumption states that it is hard to distinguish the triples $\{g^a,g^b,g^{ab}\}$ from the triples $\{g^a,g^b,g^r\}$, where $a$, $b$ and $r$ are random elements of the group $Z_q$. 
+
+More precisely, the DDH assumption is formulated as follows. Let $D$ be an algorithm that takes as input triples of group elements, and outputs a bit. We define the \textit{DDH-advantage} of $D$ to be
+\begin{equation}
+|Pr[{a, b \leftarrow Z_q}:D(g^a,g^b,g^{ab}) = 1] - Pr[{a,b,r \leftarrow Z_q}:D(g^a,g^b,g^{r}) = 1]|
+\end{equation}
+The DDH assumption (for $G$) is the assumption that any efficient algorithm's DDH-advantage is negligible.
+
+We now proceed to prove the semantic security (computational indistinguishability) of the receiver's message under DDH assumption through a sequence of games.
+
+\textbf{Game $0$} Fix an adversary $\mathcal{A}$. Let us define Game $0$ to be the attack game against $\mathcal{A}$ in the definition of semantic security. We describe the attack game algorithmically as follows
+
+\begin{center}
+\begin{tabular} {l}
+$i$ $\xleftarrow[]{\not{\text{c}}}$ $\{0,1\}$\\
+$c_i$ $\xleftarrow[]{\not{\text{c}}}$ $ab$ mod $q$\\
+$c_{i-1}$ $\xleftarrow[]{\not{\text{c}}}$ $Z_p$\\
+$\hat{i}$ $\leftarrow$ $A(p,q,g,\{g^a,g^b,g^{c_i},g^{c_{i-1}}\})$
+\end{tabular}
+\end{center}
+
+The above algorithm represents the attack game. If we define $S_0$ to be the event that $i=\hat{i}$, then the adversary's SS-advantage is $Pr[S_0] - \frac{1}{2}$.
+
+\textbf{Game 1} [This is a transition based on indistinguishability]. A small change is introduced in the above game, namely instead of computing $c_{i}$ as $ab$ mod $q$, it is chosen randomly, such that $c_{i} = z$, where $z \in Z_p$. The resulting game can be algorithmically represented as follows
+
+\begin{center}
+\begin{tabular} {l}
+$i$ $\xleftarrow[]{\not{\text{c}}}$ $\{0,1\}$\\
+$c_i$ $\xleftarrow[]{\not{\text{c}}}$ $Z_p$\\
+$c_{i-1}$ $\xleftarrow[]{\not{\text{c}}}$ $Z_p$\\
+$\hat{i}$ $\leftarrow$ $A(p,q,g,\{g^a,g^b,g^{c_i},g^{c_{i-1}}\})$
+\end{tabular}
+\end{center}
+
+Let $S_1$ be the event that $i = \hat{i}$ in Game $1$.
+
+\textit{Claim $1$.} $Pr[S_1]=\frac{1}{2}$. 
+This is because of the fact that the guess of the adversary $\hat{i}$ is independent from the secret bit $i$. If we can show that,$g^a$, $g^b$, $g^{c_i}$ and $g^{i-1}$ are mutually independent, then it follows that $i$ and $\hat{i}=A(p,q,g,\{g^a,g^b,g^{c_i},g^{c_{i-1}}\})$ are independent. In the game, by construction $g^a$, $g^b$ are mutually independent. If the value of $i$ is fixed, then notice that the conditional distribution of $c_i$ and $c_{i-1}$ on fixed $i$ are uniform distribution over $Z_q$. 
+
+\textit{Claim $2$.} $Pr[S_0] - Pr[S_1] = \epsilon_{DDH}$, where $\epsilon_{DDH}$ is the DDH-assumption. 
+
+Let us define a distinguisher algorithm $D$ that accepts a DDH triple as input and outputs a bit.
+Given a DDH triple $(\alpha, \beta, \delta)$, $D$ constructs a new tuple with a fourth element $\gamma = g^{r}$, where $r$ $\in Z_p$. The fourth element is placed according to challenger's secret bit $i$ in the tuple. Algorithmically, $D$ can be formulated as
+
+\begin{center}
+\begin{tabular} {l}
+Algorithm $D(\alpha,\beta,\delta)$ \\
+$i$ $\xleftarrow[]{\not{\text{c}}}$ $\{0,1\}$ \\
+$r$ $\xleftarrow[]{\not{\text{c}}}$ $Z_p$\\
+$\gamma$ $\xleftarrow[]{\not{\text{c}}}$ $g^r$\\
+$t_0$ $\xleftarrow[]{\not{\text{c}}}$ $\{\alpha,\beta,\delta,\gamma\}$\\
+$t_1$ $\xleftarrow[]{\not{\text{c}}}$ $\{\alpha,\beta,\gamma,\delta\}$\\
+$\hat{i}$ $\leftarrow$ $A(p,q,g,t_i)$\\
+if $i=\hat{i}$ output $1$;
+else output $0$;
+\end{tabular}
+\end{center}
+
+
+Note that, if the DDH triple is of the form $(g^a,g^b,g^{ab})$ then Game 0 is run by the distinguisher algorithm $D$.
+If $D$ gets the tuple $\{g^a,g^b,g^{r}\}$, then computation runs as Game $1$. Thus
+\begin{equation}
+Pr[a,b \xleftarrow[]{\not{\text{c}}} Z_q:D(g^a,g^b,g^{ab})=1 ] = Pr[S_0]
+\end{equation}
+\begin{equation}
+Pr[a,b,{r_1} \xleftarrow[]{\not{\text{c}}} Z_q:D(g^a,g^b,g^{r_1})=1 ] = Pr[S_1]
+\end{equation}
+It follows that $|Pr[S_0] - Pr[S_1]|$ $=$ DDH-advantage of D $=$ $\epsilon_{DDH}$.
+Combining \textit{Claim} $1$ and \textit{Claim} $2$, $Pr[S_0]$ $=$ $\frac{1}{2} - \epsilon_{DDH}$.
+
+\item A $1$ out of $n$ Oblivious Transfer protocol can be constructed from a $1$ out of $2$ protocol in the following way
+
+\begin{itemize}
+\item \textbf{Sender's Input} \{$x_0$, $x_1$, $\ldots$, $x_{n-1}$\} $\in$ $\{0, 1\}^{l}$, let $n = {(2^{d} - 1})$, the index of $x$ be represented as $I = \{I_0, \ldots, I_{(d-1)}\}$, such that $I^{th}$ $x$ be represented as $x_I$.
+
+\item \textbf{Receiver's Input} $t = (t_0, t_1, \ldots, t_{d-1}) \in \{0,\ldots, {n-1}\}$
+
+\item \textbf{Receiver's message}
+\begin{enumerate}
+\item Choose a random prime $p$, of the form $p = (2q + 1)$. Let $G$ be the group of quadratic residues modulus $p$, (here $|G|$ $=$ $q$) and $g$ be the generator of the group. 
+\item Receiver chooses $d$ pairs of random values $(a_j, b_j)_{j=0}^{d-1}$ from the range \{$0,\ldots, (p-1)$\}. 
+\item It computes $d$ pairs of values $c_{j}^{(i)} = {a_j}\cdot {b_j}$ mod $q$, and $c_{j}^{(i - 1)}$ is chosen randomly from the range \{$0, \ldots, (p-1)$\}. Here $j$ ranges between \{$0, \ldots, (d-1)$\}, and $i = t_j$.
+
+\item It then sends to the sender the primes $p$, $q$, the generator $g$, and $d$ number of tuples $<g^{a_j}$, $g^{b_j}, g^{{c_j}^{(0)}}, g^{{c_j}^{(1)}}>$, for $j \in \{0, \ldots {d-1}\}$.
+\end{enumerate}
+
+\item \textbf{Sender's message}
+\begin{enumerate}
+\item Sender is given $d$ tuples $<g^{a_j}$, $g^{b_j}, g^{{c_j}^{(0)}}, g^{{c_j}^{(1)}}>$, for $j \in \{0, \ldots {d-1}\}$. It verifies all the elements belong to group $G$, and that $g^{c_{j}^{(0)}} \neq g^{c_{j}^{(1)}}$. 
+
+\item It then chooses at random, $d$ pairs of values $(r_j, s_j)$, for $j \in \{0, \ldots {d-1}\}$ from the range \{$0, \ldots, (q-1)$\}.
+\item It computes $I$ number of ${\pi}_{I}$ values as: 
+\begin{equation}
+\pi_{I} = {\pi}_{\{I_0, \ldots, I_{(d-1)}\}} = \oplus_{j=0}^{d-1} {\pi}_{j} = \oplus_{j=0}^{d-1} \{{({g^{c_j}}^{(I_j)})}^{r_j} \cdot {(g^{b_j})}^{s_j}\}
+\end{equation}
+\item It computes encryption of messages: $z_{I}$ as $z_I = x_I \oplus {\pi_I}$.
+for $I \in (0, \ldots, n - 1$).
+
+\item Sender sends the encrypted values $<z_I>$, for $I = (I_0,\ldots,I_{d-1}) \in \{0, 1, \ldots, (n-1)\}$ to the receiver.
+\end{enumerate}
+
+\item Now the $1$ out of $2$ OT protocol (described in the problem definition) is run for $d$ times. In the $j^{th}$ iteration -
+
+\begin{enumerate}
+\item The sender computes the value of $w_j$ as $w_j = {(g^{a_j})^{r_j}} \cdot {g^{s_j}}$.
+\item $w_j$ is sent to the receiver.
+\item At receiver's end, ${\pi}_j$ is calculated as ${\pi}_j = {(w_j)}^{b_j}$.
+\end{enumerate}
+
+\item At the end of $d$ iterations, 
+\begin{enumerate}
+\item ${\pi}_I$ is computed as ${\pi}_I = \oplus_{j=0}^{d-1} {{\pi}_j}$.
+\item Then it computes $x_I = {\pi}_I \oplus z_I$, for $I \in \{0, 1, \ldots, (n-1)\}$.
+ \end{enumerate}
+
+\item At the end of the computation, only $x_t$ will be correctly retrieved.
+\end{itemize}
+\end{enumerate}
+
+\section{Provable Security Basics}
+\begin{enumerate}
+\item \textbf{IND-CPA security of an encryption scheme?}
+\end{enumerate}
+
+\section{Scribes of 09.05.2018}
+\begin{enumerate}
+\item \textit{Common Reference String (CRS) Model}
+\begin{itemize}
+\item 
+\end{itemize}
+\item \textit{Random Oracle Model}
+\end{enumerate}
+
+\section{How to use Bitcoin to play Decentralized Poker - Key Points}
+In the literature the following are proposed
+\begin{enumerate}
+\item Construction of lottery protocols that ensures that any party that aborts after learning the outcome of any round, pays a monetary penalty to all parties that did not learn the output. [Andrychowicz et al. Bitcoin Workshop 2014]
+\item Later the work was also extended to support this functionality for arbitrary secure function evaluation.
+\end{enumerate}
+In this work, authors propose the following
+\begin{enumerate}
+\item The notion of secure cash distribution with penalties has been introduced which is posed as a multi-round reactive functionality (more general than the secure function evaluation) which is able to capture wide variety of stateful computations involving data or money such as the decentralized auctions, games such as poker.
+\item Secure cash distribution with penalties is realized as
+\begin{itemize}
+\item The computation is carried out within finite number of stages.
+\item Initially there is deposit phase where parties deposit money to the blockchain
+\item After the completion of the deposit phase, the parties provide inputs to calculate the output in a round.
+\item In the cash distribution stage, based on the output of the last stage, money will be distributed back to the parties.
+\item If any party abruptly ends the computation, then the other parties should be compensated with money.
+\end{itemize}
+\item 
+\end{enumerate}
+
+\section{fPAKE Project: Discussion Points}
+\begin{itemize}
+\item In section $1$ (Introduction), the idea of a PAKE protocol is discussed. A PAKE protocol allows two parties to agree on a shared high entropy key if and only if they hold the same password. Now I have the following questions
+\begin{enumerate}
+\item Intuitively speaking, do the leakage of the password to an adversary leads to the recovery of the agreed key ?(what is the relation to the entropy of the key here? My understanding: If we require the pass-strings to be selected/generated from a high entropy distribution, then it means weaker security guarantee)
+\item When the pass-strings are noisy (the two parties have slightly different versions of it), then what happens if the pass-strings (key) is chosen from a low entropy distribution?
+\end{enumerate}
+\item In section $1.1$ (Our Contributions), page 4, authors mention how the ideal functionality of PAKE defined by Canetti et al. has been modified to support generation of equal output keys, even when the input pass strings differ slightly. The question is, why would this be a good scenario to support? Is it desirable from the user's perspective? Maybe I am failing to understand the scenario here.
+\item \textbf{Meeting notes 08.06}
+\begin{enumerate}
+\item It is better
+\end{enumerate}
+\end{itemize}
+
+\section{Sok Meeting Notes 30.05} Discussion on state channels beginning with the lightning network - multi-signatures, HTLC(h, pk)
+\begin{enumerate}
+\item Attacks on the HTLC based channel creating $(l\dot\delta)$ delay in the payment channel. Think about adversaries in the malicious setting and possible attacks.
+\item work around proposed in Sprites paper with hash value search in the BC blockchain, delay reduces to $(l + \delta)$.
+\item further work trying to enhance privacy, why should the money transfer values be publicly known? It reduces the privacy of the involved parties. 
+\begin{itemize}
+\item Consider $x_0$, $x_1$, $\ldots$, $x_l$ for $l+1$ parties.
+\item Money to be transferred from A to D via other parties starting from B.
+\item B should reveal the pre-image of $H({x_0}\oplus{x_1}\oplus\ldots{x_l})$
+\item goal is to confuse attackers the addresses of sender/receiver in the payment channel to enhance privacy
+\end{itemize}
+\end{enumerate}
+
+
+\section{}
+\end{document}
